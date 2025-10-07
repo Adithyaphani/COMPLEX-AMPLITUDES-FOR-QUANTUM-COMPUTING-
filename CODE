@@ -1,0 +1,171 @@
+import numpy as np
+
+def prepare_two_qubit_state(amplitudes):
+    """
+    Prepare a two-qubit quantum state from complex amplitudes.
+    
+    Args:
+        amplitudes: List of 4 complex amplitudes [a0, a1, a2, a3]
+        
+    Returns:
+        numpy.array: The normalized quantum state vector |ψ⟩ = a0|00⟩ + a1|01⟩ + a2|10⟩ + a3|11⟩
+    """
+    # Convert to numpy array
+    amps = np.array(amplitudes, dtype=complex)
+    
+    # Check dimension
+    if len(amps) != 4:
+        raise ValueError(f"Expected 4 amplitudes for two-qubit state, got {len(amps)}")
+    
+    # Calculate norm
+    norm_sq = 0.0
+    for amp in amps:
+        norm_sq += np.abs(amp) ** 2
+    norm = np.sqrt(norm_sq)
+    
+    # Normalize if necessary (with tolerance for floating point errors)
+    if abs(norm - 1.0) > 1e-12:
+        amps = amps / norm
+    
+    return amps
+
+def prepare_three_qubit_state(amplitudes):
+    """
+    Prepare a three-qubit quantum state from complex amplitudes.
+    
+    Args:
+        amplitudes: List of 8 complex amplitudes [a0, a1, a2, a3, a4, a5, a6, a7]
+        
+    Returns:
+        numpy.array: The normalized quantum state vector
+    """
+    # Convert to numpy array
+    amps = np.array(amplitudes, dtype=complex)
+    
+    # Check dimension
+    if len(amps) != 8:
+        raise ValueError(f"Expected 8 amplitudes for three-qubit state, got {len(amps)}")
+    
+    # Calculate norm
+    norm_sq = 0.0
+    for amp in amps:
+        norm_sq += np.abs(amp) ** 2
+    norm = np.sqrt(norm_sq)
+    
+    # Normalize if necessary
+    if abs(norm - 1.0) > 1e-12:
+        amps = amps / norm
+    
+    return amps
+
+# Unit tests
+import unittest
+
+class TestQuantumStatePreparation(unittest.TestCase):
+    
+    def test_normalization_enforced(self):
+        """Test that non-normalized inputs are properly normalized."""
+        # Test non-normalized two-qubit state
+        non_norm = [1.0, 2.0, 3.0, 4.0]
+        result = prepare_two_qubit_state(non_norm)
+        
+        # Calculate norm of result
+        norm_sq = sum(np.abs(amp) ** 2 for amp in result)
+        self.assertAlmostEqual(norm_sq, 1.0, places=10)
+    
+    def test_already_normalized_unchanged(self):
+        """Test that already normalized states remain unchanged."""
+        # Bell state (already normalized)
+        bell_state = [1/np.sqrt(2), 0, 0, 1/np.sqrt(2)]
+        result = prepare_two_qubit_state(bell_state)
+        
+        np.testing.assert_array_almost_equal(result, bell_state)
+        
+        # Check norm is 1
+        norm_sq = sum(np.abs(amp) ** 2 for amp in result)
+        self.assertAlmostEqual(norm_sq, 1.0, places=10)
+    
+    def test_correct_dimension_two_qubit(self):
+        """Test that two-qubit states have correct dimension (4)."""
+        amplitudes = [0.5, 0.5, 0.5, 0.5]
+        result = prepare_two_qubit_state(amplitudes)
+        self.assertEqual(len(result), 4)
+    
+    def test_correct_dimension_three_qubit(self):
+        """Test that three-qubit states have correct dimension (8)."""
+        amplitudes = [0.5] * 8
+        result = prepare_three_qubit_state(amplitudes)
+        self.assertEqual(len(result), 8)
+    
+    def test_complex_amplitudes(self):
+        """Test with complex amplitudes."""
+        complex_amps = [0.5+0.5j, 0.5-0.5j, -0.5+0.5j, -0.5-0.5j]
+        result = prepare_two_qubit_state(complex_amps)
+        
+        # Check normalization
+        norm_sq = sum(np.abs(amp) ** 2 for amp in result)
+        self.assertAlmostEqual(norm_sq, 1.0, places=10)
+        self.assertEqual(len(result), 4)
+    
+    def test_three_qubit_normalization(self):
+        """Test three-qubit state normalization."""
+        non_norm = [1.0] * 8  # Norm = sqrt(8)
+        result = prepare_three_qubit_state(non_norm)
+        
+        norm_sq = sum(np.abs(amp) ** 2 for amp in result)
+        self.assertAlmostEqual(norm_sq, 1.0, places=10)
+    
+    def test_error_wrong_dimension(self):
+        """Test error handling for incorrect input sizes."""
+        with self.assertRaises(ValueError):
+            prepare_two_qubit_state([1, 0, 0])  # Only 3 amplitudes
+        
+        with self.assertRaises(ValueError):
+            prepare_three_qubit_state([1, 0, 0, 0, 0])  # Only 5 amplitudes
+
+def demonstrate_usage():
+    """Demonstrate the usage of the state preparation functions."""
+    print("=== Quantum State Preparation Demonstration ===\n")
+    
+    # Example 1: Bell state (already normalized)
+    print("1. Bell state (already normalized):")
+    bell_amplitudes = [1/np.sqrt(2), 0, 0, 1/np.sqrt(2)]
+    bell_state = prepare_two_qubit_state(bell_amplitudes)
+    print(f"Input: {bell_amplitudes}")
+    print(f"Output: {bell_state}")
+    print(f"Norm: {np.sqrt(sum(np.abs(amp)**2 for amp in bell_state)):.6f}\n")
+    
+    # Example 2: Non-normalized state
+    print("2. Non-normalized state:")
+    non_norm = [1, 2, 3, 4]
+    normalized_state = prepare_two_qubit_state(non_norm)
+    print(f"Input: {non_norm}")
+    print(f"Output: {normalized_state}")
+    print(f"Norm: {np.sqrt(sum(np.abs(amp)**2 for amp in normalized_state)):.6f}\n")
+    
+    # Example 3: Three-qubit GHZ state
+    print("3. Three-qubit GHZ state:")
+    ghz_amplitudes = [1/np.sqrt(2), 0, 0, 0, 0, 0, 0, 1/np.sqrt(2)]
+    ghz_state = prepare_three_qubit_state(ghz_amplitudes)
+    print(f"Input: {ghz_amplitudes}")
+    print(f"Output: {ghz_state}")
+    print(f"Norm: {np.sqrt(sum(np.abs(amp)**2 for amp in ghz_state)):.6f}\n")
+    
+    # Example 4: Complex amplitudes
+    print("4. Complex amplitudes:")
+    complex_amps = [0.5+0.5j, 0.5-0.5j, 0.5+0.5j, 0.5-0.5j]
+    complex_state = prepare_two_qubit_state(complex_amps)
+    print(f"Input: {complex_amps}")
+    print(f"Output: {complex_state}")
+    print(f"Norm: {np.sqrt(sum(np.abs(amp)**2 for amp in complex_state)):.6f}")
+
+if __name__ == "__main__":
+    # Demonstrate usage
+    demonstrate_usage()
+    
+    print("\n" + "="*60)
+    print("Running unit tests...")
+    print("="*60)
+    
+    # Run unit tests
+    unittest.main(argv=[''], verbosity=2, exit=False)
