@@ -2,7 +2,7 @@
 Core Concept
 The task is to create a quantum state from given complex numbers (amplitudes) that define the probabilities and phases of different quantum configurations.
 
-What is a Quantum State?
+What is a Quantum State:
 For 2 qubits: |ψ⟩ = a0|00⟩ + a1|01⟩ + a2|10⟩ + a3|11⟩
 
 Each amplitude (a0, a1, a2, a3) is a complex number
